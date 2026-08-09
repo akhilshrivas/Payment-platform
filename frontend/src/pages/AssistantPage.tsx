@@ -21,12 +21,14 @@ const AssistantPage: React.FC = () => {
     const loadConversations = async () => {
         try {
             const data = await assistantApi.getConversations();
-            setConversations(data);
-            if (data.length > 0 && !activeConv) {
-                loadConversation(data[0].id);
+            const validData = Array.isArray(data) ? data : [];
+            setConversations(validData);
+            if (validData.length > 0 && !activeConv) {
+                loadConversation(validData[0].id);
             }
         } catch (error) {
             console.error("Failed to load conversations", error);
+            setConversations([]);
         }
     };
 
