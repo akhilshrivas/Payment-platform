@@ -17,6 +17,10 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
 
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv()) if origin.strip()
+]
+
 # ============================================================
 # Email — use real SMTP in production
 # ============================================================
@@ -25,4 +29,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # ============================================================
 # Static files — served by nginx in production
 # ============================================================
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
+}

@@ -3,11 +3,18 @@ Shared pytest fixtures for all tests.
 """
 
 import pytest
+import django
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
+
+@pytest.fixture(autouse=True)
+def celery_eager(settings):
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.CELERY_TASK_STORE_EAGER_RESULT = True
 
 
 @pytest.fixture

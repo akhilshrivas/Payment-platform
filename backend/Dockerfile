@@ -15,14 +15,16 @@ WORKDIR /app
 
 # Install Python dependencies before copying code (layer cache)
 COPY requirements/ requirements/
+ARG REQUIREMENTS_FILE=development.txt
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements/development.txt
+    && pip install --no-cache-dir -r requirements/${REQUIREMENTS_FILE}
 
 # Copy project
 COPY . .
 
 # Create a non-root user for security
 RUN useradd -m -u 1000 appuser \
+    && mkdir -p /app/staticfiles /app/media \
     && chown -R appuser:appuser /app
 USER appuser
 

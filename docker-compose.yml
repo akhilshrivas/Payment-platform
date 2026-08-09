@@ -47,6 +47,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: payment-platform-backend-dev
     container_name: payment_backend
     restart: unless-stopped
     env_file:
@@ -79,6 +80,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: payment-platform-celery-worker-dev
     container_name: payment_celery_worker
     restart: unless-stopped
     env_file:
@@ -105,6 +107,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: payment-platform-celery-beat-dev
     container_name: payment_celery_beat
     restart: unless-stopped
     env_file:
@@ -131,6 +134,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: payment-platform-frontend-dev
     container_name: payment_frontend
     restart: unless-stopped
     env_file:
@@ -147,4 +151,8 @@ services:
 
 volumes:
   postgres_data:
+    name: payment-platform_postgres_data
+    external: true
   redis_data:
+    name: payment-platform_redis_data
+    external: true

@@ -49,6 +49,7 @@ LOCAL_APPS = [
     "apps.payments",
     "apps.recurring_payments",
     "apps.notifications",
+    "apps.ai",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -248,6 +249,13 @@ EMAIL_BACKEND = config(
     default="django.core.mail.backends.console.EmailBackend",
 )
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+
+# ============================================================
+# AI Assistant
+# ============================================================
+AI_PROVIDER = config("AI_PROVIDER", default="openai")
+AI_API_KEY = config("AI_API_KEY", default="")
+AI_MODEL = config("AI_MODEL", default="gpt-4o-mini")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")

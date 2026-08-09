@@ -55,11 +55,11 @@ class Wallet(BaseModel):
         verbose_name_plural = "Wallets"
         constraints = [
             models.CheckConstraint(
-                check=models.Q(balance__gte=Decimal("0.00")),
-                name="wallet_balance_non_negative",
+                check=models.Q(balance__gte=0),
+                name="balance_non_negative",
             ),
             models.CheckConstraint(
-                check=models.Q(available_balance__gte=Decimal("0.00")),
+                check=models.Q(available_balance__gte=0),
                 name="wallet_available_balance_non_negative",
             ),
         ]

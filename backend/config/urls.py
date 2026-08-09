@@ -4,6 +4,7 @@ Root URL configuration for the Payment Platform API.
 
 from django.conf import settings
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -11,7 +12,11 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+def health_check(request):
+    return JsonResponse({"status": "ok", "message": "Backend is healthy"})
+
 urlpatterns = [
+    path("api/health/", health_check),
     # Django admin
     path("admin/", admin.site.urls),
 
@@ -32,6 +37,9 @@ urlpatterns = [
 
     # Notifications
     path("api/notifications/", include("apps.notifications.urls")),
+
+    # AI
+    path("api/ai/", include("apps.ai.urls")),
 
     # OpenAPI / Swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

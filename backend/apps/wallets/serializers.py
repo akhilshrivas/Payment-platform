@@ -1,5 +1,6 @@
 """Wallet serializers."""
 
+from decimal import Decimal
 from rest_framework import serializers
 
 from apps.wallets.models import Wallet
@@ -37,7 +38,7 @@ class TransferSerializer(serializers.Serializer):
     """Input for wallet-to-wallet transfer."""
 
     receiver_email = serializers.EmailField()
-    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value="0.01")
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal("0.01"))
     description = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
 
     def validate_amount(self, value):

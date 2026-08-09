@@ -155,12 +155,69 @@ class PaymentService:
             payment.razorpay_signature = razorpay_signature
             payment.save(update_fields=["razorpay_payment_id", "razorpay_signature", "updated_at"])
 
+        # Actually confirm the payment, credit the wallet, and mark as succeeded
+        self.process_successful_payment(payment, razorpay_payment_id)
+
         logger.info(
-            "Payment signature verified (waiting for webhook) | ref=%s | payment_id=%s",
+            "Payment signature verified and payment processed | ref=%s | payment_id=%s",
             payment.payment_reference,
             razorpay_payment_id,
         )
         return payment
+
+    @classmethod
+    def process_successful_payment(cls, payment: Payment, razorpay_payment_id: str) -> None:
+        """
+        Idempotent operation to mark payment as SUCCEEDED, credit wallet, and create transaction.
+        Used by both frontend verification and webhook.
+        """
+        from django.db import transaction
+        from apps.transactions.models import Transaction
+        from apps.wallets.models import Wallet
+        from apps.notifications.services.notification_service import NotificationService
+
+        with transaction.atomic():
+            # Lock the payment for update
+            locked_payment = Payment.objects.select_for_update().get(pk=payment.pk)
+
+            # Idempotency guard
+            if locked_payment.status == Payment.Status.SUCCEEDED:
+                logger.info("Payment already SUCCEEDED (idempotent skip) | ref=%s", locked_payment.payment_reference)
+                return
+
+            # Update payment status
+            if not locked_payment.razorpay_payment_id:
+                locked_payment.razorpay_payment_id = razorpay_payment_id
+            locked_payment.status = Payment.Status.SUCCEEDED
+            locked_payment.save(update_fields=["razorpay_payment_id", "status", "updated_at"])
+
+            # Credit wallet
+            wallet = Wallet.objects.select_for_update().get(user=locked_payment.user)
+            amount_inr = locked_payment.amount
+            wallet.balance += amount_inr
+            wallet.available_balance += amount_inr
+            wallet.save(update_fields=["balance", "available_balance", "updated_at"])
+
+            # Create completed Transaction
+            tx = Transaction.objects.create(
+                transaction_reference=generate_reference("DEP"),
+                receiver_wallet=wallet,
+                sender_wallet=None,
+                amount=amount_inr,
+                currency=locked_payment.currency,
+                transaction_type=Transaction.TransactionType.DEPOSIT,
+                status=Transaction.Status.COMPLETED,
+                description=locked_payment.description or "Wallet deposit via Razorpay",
+                razorpay_payment_id=razorpay_payment_id,
+            )
+
+        logger.info(
+            "Wallet credited after payment success | ref=%s | amount=%s | tx_ref=%s",
+            locked_payment.payment_reference, amount_inr, tx.transaction_reference
+        )
+
+        # Async notifications (non-blocking)
+        NotificationService.notify_deposit_success(locked_payment.user, amount_inr, tx.transaction_reference)
 
     def refund_payment(
         self,
