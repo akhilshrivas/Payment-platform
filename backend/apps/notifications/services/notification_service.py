@@ -1,6 +1,5 @@
 """
 Notification service.
-
 Creates in-app notifications and dispatches async email notifications.
 All methods are non-blocking (they enqueue Celery tasks for email sending).
 """
