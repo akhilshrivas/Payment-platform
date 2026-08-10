@@ -7,16 +7,17 @@ logger = logging.getLogger(__name__)
 
 class AIProvider:
     def __init__(self):
-        self.provider = getattr(settings, "AI_PROVIDER", "openai").lower()
+        self.provider = getattr(settings, "AI_PROVIDER", "groq").lower()
         self.api_key = getattr(settings, "AI_API_KEY", "")
-        self.model = getattr(settings, "AI_MODEL", "gpt-4o-mini")
+        self.model = getattr(settings, "AI_MODEL", "openai/gpt-oss-20b")
+        self.base_url = getattr(settings, "AI_BASE_URL", "https://api.groq.com/openai/v1").rstrip('/')
 
     def generate_response(self, messages, tools=None):
         if not self.api_key:
             logger.error("AI_API_KEY is not configured.")
             return {"error": "AI configuration error. Please contact support."}
         
-        url = "https://api.openai.com/v1/chat/completions"
+        url = f"{self.base_url}/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"

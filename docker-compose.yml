@@ -137,10 +137,8 @@ services:
     image: payment-platform-frontend-dev
     container_name: payment_frontend
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
-      VITE_API_URL: http://localhost:8000
+      VITE_API_URL: ${FRONTEND_API_URL:-http://localhost:8000}
     volumes:
       - ./frontend:/app
       - /app/node_modules  # Anonymous volume prevents host overwrite

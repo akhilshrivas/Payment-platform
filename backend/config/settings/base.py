@@ -253,9 +253,10 @@ EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 # ============================================================
 # AI Assistant
 # ============================================================
-AI_PROVIDER = config("AI_PROVIDER", default="openai")
+AI_PROVIDER = config("AI_PROVIDER", default="groq")
 AI_API_KEY = config("AI_API_KEY", default="")
-AI_MODEL = config("AI_MODEL", default="gpt-4o-mini")
+AI_MODEL = config("AI_MODEL", default="openai/gpt-oss-20b")
+AI_BASE_URL = config("AI_BASE_URL", default="https://api.groq.com/openai/v1")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")

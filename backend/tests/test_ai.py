@@ -129,7 +129,38 @@ class TestAIAssistant:
             conv = AIConversation.objects.get(id=conv_id)
             assert conv.messages.count() == 4 # User1, Asst1, User2, Asst2
 
-            # Fetch list
             list_res = client.get(conversations_url)
             data = list_res.data.get("data", list_res.data)
             assert len(data) == 1
+
+    def test_provider_url_selection_groq(self, settings):
+        settings.AI_PROVIDER = "groq"
+        settings.AI_BASE_URL = "https://api.groq.com/openai/v1"
+        settings.AI_API_KEY = "test_key"
+        from apps.ai.services.llm_provider import AIProvider
+        provider = AIProvider()
+        assert provider.base_url == "https://api.groq.com/openai/v1"
+        
+        with patch('requests.post') as mock_post:
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = {"choices": [{"message": {"content": "Test"}}]}
+            provider.generate_response([{"role": "user", "content": "hi"}])
+            mock_post.assert_called_once()
+            args, kwargs = mock_post.call_args
+            assert args[0] == "https://api.groq.com/openai/v1/chat/completions"
+
+    def test_provider_url_selection_openai(self, settings):
+        settings.AI_PROVIDER = "openai"
+        settings.AI_BASE_URL = "https://api.openai.com/v1"
+        settings.AI_API_KEY = "test_key"
+        from apps.ai.services.llm_provider import AIProvider
+        provider = AIProvider()
+        assert provider.base_url == "https://api.openai.com/v1"
+        
+        with patch('requests.post') as mock_post:
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = {"choices": [{"message": {"content": "Test"}}]}
+            provider.generate_response([{"role": "user", "content": "hi"}])
+            mock_post.assert_called_once()
+            args, kwargs = mock_post.call_args
+            assert args[0] == "https://api.openai.com/v1/chat/completions"
