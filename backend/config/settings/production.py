@@ -21,6 +21,10 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv()) if origin.strip()
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() for origin in config("CORS_ALLOWED_ORIGINS", default="", cast=Csv()) if origin.strip()
+]
+
 # ============================================================
 # Email — use real SMTP in production
 # ============================================================
@@ -34,3 +38,16 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
     },
 }
+
+# ============================================================
+# Database Configuration
+# ============================================================
+import dj_database_url
+
+db_url = config("DATABASE_URL", default=None)
+if db_url:
+    DATABASES["default"] = dj_database_url.parse(
+        db_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
